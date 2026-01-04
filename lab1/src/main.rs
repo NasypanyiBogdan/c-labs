@@ -1,38 +1,79 @@
 fn main() {
-    let k = 10; 
-    let n_fixed = 5; 
-    let eps = 0.0001; 
-    let a = 0.0;
-    let b = 1.0;
-    let h = (b - a) / ((k - 1) as f32);
+    let p = vec![
+        vec![3.0, 1.0, 2.0, -1.0],
+        vec![2.0, 1.0, 1.0, 0.0],
+        vec![-1.0, 0.0, 0.0, 2.0],
+        vec![1.0, -2.0, 3.0, 1.0],
+    ];
+    let f = vec![
+        vec![-1.0, 1.0, 0.0, -1.0],
+        vec![2.0, 1.0, -2.0, 0.0],
+        vec![-1.0, 0.0, 0.0, 2.0],
+        vec![1.0, -2.0, 4.0, 1.0],
+    ];
+    let n = vec![
+        vec![-1.0, 1.0, 0.0, 1.0],
+        vec![0.0, 1.0, -2.0, 0.0],
+        vec![-1.0, 1.0, 0.0, 2.0],
+        vec![-1.0, -2.0, 2.0, 1.0],
+    ];
 
-    println!("{:<5} | {:<8} | {:<10} | {:<10} | {:<10}", "i", "x", "Sn (n=5)", "Se (eps)", "y (exact)");
-    println!("{:-<55}", "");
+    let z = vec![0.0, 4.0, -3.0, -1.0];
+    let r = vec![-1.0, -3.0, 4.0, 0.0]; 
+    let p2 = multiply_matrices(&p, &p);
+    let fn_mat = multiply_matrices(&f, &n);
+    let three_fn = multiply_matrix_scalar(&fn_mat, 3.0);
+    let m1 = subtract_matrices(&p2, &three_fn);
+    let three_r = multiply_vector_scalar(&r, 3.0);
+    let v1 = add_vectors(&z, &three_r);
+    let final_result = multiply_matrix_vector(&m1, &v1);
 
-    for i in 1..k + 1 {
-        let x = a + ((i - 1) as f32) * h;
-        let y_exact = ((1.0 + x.powi(2)) / 2.0) * x.atan() - (x / 2.0);
-        let mut sn = 0.0;
-        for n in 1..n_fixed + 1 {
-            sn += term(x, n);
-        }
-
-        let mut se = 0.0;
-        let mut n = 1;
-        loop {
-            let an = term(x, n);
-            if an.abs() < eps { break; }
-            se += an;
-            n += 1;
-        }
-
-        println!("{:2}    | {:8.5} | {:10.5} | {:10.5} | {:10.5}", i, x, sn, se, y_exact);
-    }
+    println!("Результат обчислення виразу (P^2 - 3FN)(z + 3r):");
+    println!("{:?}", final_result);
 }
 
-fn term(x: f32, n: i32) -> f32 {
-    let sign = if (n + 1) % 2 == 0 { 1.0 } else { -1.0 };
-    let numerator = x.powi(2 * n + 1);
-    let denominator = (4 * n.pow(2) - 1) as f32;
-    sign * (numerator / denominator)
+fn multiply_matrices(a: &Vec<Vec<f64>>, b: &Vec<Vec<f64>>) -> Vec<Vec<f64>> {
+    let size = a.len();
+    let mut res = vec![vec![0.0; size]; size];
+    for i in 0..size {
+        for j in 0..size {
+            for k in 0..size {
+                res[i][j] += a[i][k] * b[k][j];
+            }
+        }
+    }
+    res
+}
+
+fn subtract_matrices(a: &Vec<Vec<f64>>, b: &Vec<Vec<f64>>) -> Vec<Vec<f64>> {
+    let size = a.len();
+    let mut res = vec![vec![0.0; size]; size];
+    for i in 0..size {
+        for j in 0..size {
+            res[i][j] = a[i][j] - b[i][j];
+        }
+    }
+    res
+}
+
+fn multiply_matrix_scalar(a: &Vec<Vec<f64>>, s: f64) -> Vec<Vec<f64>> {
+    a.iter().map(|row| row.iter().map(|&x| x * s).collect()).collect()
+}
+
+fn multiply_matrix_vector(m: &Vec<Vec<f64>>, v: &Vec<f64>) -> Vec<f64> {
+    let mut res = vec![0.0; m.len()];
+    for i in 0..m.len() {
+        for j in 0..v.len() {
+            res[i] += m[i][j] * v[j];
+        }
+    }
+    res
+}
+
+fn add_vectors(a: &Vec<f64>, b: &Vec<f64>) -> Vec<f64> {
+    a.iter().zip(b.iter()).map(|(&x, &y)| x + y).collect()
+}
+
+fn multiply_vector_scalar(v: &Vec<f64>, s: f64) -> Vec<f64> {
+    v.iter().map(|&x| x * s).collect()
 }
