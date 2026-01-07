@@ -5,20 +5,16 @@
 int main() {
     int N, i, j;
     int **A, **B, **C;
-
     printf("Input matrix size: ");
     scanf("%d", &N);
-
     A = (int**)malloc(N * sizeof(int*));
     B = (int**)malloc(N * sizeof(int*));
     C = (int**)malloc(N * sizeof(int*));
-
     for (i = 0; i < N; i++) {
         A[i] = (int*)malloc(N * sizeof(int));
         B[i] = (int*)malloc(N * sizeof(int));
         C[i] = (int*)malloc(N * sizeof(int));
     }
-
     printf("\nInput matrix A:\n");
     for (i = 0; i < N; i++)
         for (j = 0; j < N; j++)
@@ -42,7 +38,6 @@ int main() {
         }
         printf("\n");
     }
-
     for (i = 0; i < N; i++) {
         free(A[i]);
         free(B[i]);
